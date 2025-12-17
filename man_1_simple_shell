@@ -1,0 +1,48 @@
+
+---
+
+## 📄 `man_1_simple_shell`
+
+```man
+.TH SIMPLE_SHELL 1 "December 2025" "Simple Shell" "User Commands"
+.SH NAME
+simple_shell \- a simple UNIX command interpreter
+.SH SYNOPSIS
+.B hsh
+.SH DESCRIPTION
+Simple Shell is a basic UNIX command interpreter that executes commands read
+from standard input. It works in both interactive and non-interactive modes.
+
+The shell creates child processes to execute commands using execve and waits
+for them to terminate before continuing execution.
+
+.SH FEATURES
+- Command execution via fork and execve
+- PATH resolution
+- Interactive and non-interactive usage
+- Environment inheritance
+
+.SH USAGE
+Interactive mode:
+.PP
+.nf
+$ ./hsh
+($) /bin/ls
+($) exit
+.fi
+
+Non-interactive mode:
+.PP
+.nf
+$ echo "/bin/ls" | ./hsh
+.fi
+
+.SH EXIT STATUS
+Returns 0 on success. Returns non-zero on failure.
+
+.SH AUTHORS
+Kevin Galarza Arzon  
+Anthony Caban
+
+.SH SEE ALSO
+sh(1), execve(2), fork(2), wait(2)
