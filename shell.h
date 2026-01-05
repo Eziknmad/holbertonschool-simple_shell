@@ -31,4 +31,12 @@ void print_prompt(void);
  */
 void execute_command(char *line);
 
+/**
+ * find_command - finds command in PATH
+ * @command: command to find
+ *
+ * Return: full path or NULL
+ */
+char *find_command(char *command);
+
 #endif /* SIMPLE_SHELL_H */
