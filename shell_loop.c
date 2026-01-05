@@ -13,6 +13,35 @@ void print_prompt(void)
 }
 
 /**
+ * _getenv - gets environment variable value
+ * @name: variable name
+ *
+ * Return: pointer to value or NULL
+ */
+char *_getenv(char *name)
+{
+	int i, j;
+	char *value;
+
+	if (!name || !environ)
+		return (NULL);
+
+	for (i = 0; environ[i]; i++)
+	{
+		j = 0;
+		while (name[j] && environ[i][j] && name[j] == environ[i][j])
+			j++;
+
+		if (name[j] == '\0' && environ[i][j] == '=')
+		{
+			value = &environ[i][j + 1];
+			return (value);
+		}
+	}
+	return (NULL);
+}
+
+/**
  * find_command - finds command in PATH or returns absolute path
  * @command: command to find
  *
@@ -30,7 +59,7 @@ char *find_command(char *command)
 		return (NULL);
 	}
 
-	path = getenv("PATH");
+	path = _getenv("PATH");
 	if (!path)
 		return (NULL);
 
@@ -103,6 +132,42 @@ void execute_command(char *line)
 }
 
 /**
+ * trim_whitespace - removes leading and trailing whitespace
+ * @str: string to trim
+ *
+ * Return: void
+ */
+void trim_whitespace(char *str)
+{
+	int i, j;
+	int len = strlen(str);
+
+	/* Remove trailing whitespace */
+	while (len > 0 && (str[len - 1] == ' ' || str[len - 1] == '\t'))
+	{
+		str[len - 1] = '\0';
+		len--;
+	}
+
+	/* Remove leading whitespace */
+	i = 0;
+	while (str[i] == ' ' || str[i] == '\t')
+		i++;
+
+	if (i > 0)
+	{
+		j = 0;
+		while (str[i])
+		{
+			str[j] = str[i];
+			j++;
+			i++;
+		}
+		str[j] = '\0';
+	}
+}
+
+/**
  * shell_loop - main shell execution loop
  *
  * Return: void
@@ -132,6 +197,7 @@ void shell_loop(void)
 		if (line[read - 1] == '\n')
 			line[read - 1] = '\0';
 
+		trim_whitespace(line);
 		execute_command(line);
 	}
 }

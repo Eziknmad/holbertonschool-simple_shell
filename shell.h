@@ -39,4 +39,20 @@ void execute_command(char *line);
  */
 char *find_command(char *command);
 
+/**
+ * _getenv - gets environment variable value
+ * @name: variable name
+ *
+ * Return: pointer to value or NULL
+ */
+char *_getenv(char *name);
+
+/**
+ * trim_whitespace - removes leading and trailing whitespace
+ * @str: string to trim
+ *
+ * Return: void
+ */
+void trim_whitespace(char *str);
+
 #endif /* SIMPLE_SHELL_H */
