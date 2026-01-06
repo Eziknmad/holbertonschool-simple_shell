@@ -2,24 +2,26 @@
 #include <string.h>
 
 /**
- * _getenv - gets the value of an environment variable.
- * @name: the name of the environment variable.
- * Return: pointer to the value string or NULL if not found.
+ * _getenv - gets the value of an environment variable
+ * @name: name of the variable
+ *
+ * Return: pointer to value or NULL if not found
  */
 char *_getenv(const char *name)
 {
-	int i, len;
+	int i, j;
 
-	if (!name)
+	if (!name || !environ)
 		return (NULL);
-
-	len = strlen(name);
 
 	for (i = 0; environ[i]; i++)
 	{
-		if (strncmp(environ[i], name, len) == 0 && environ[i][len] == '=')
-			return (environ[i] + len + 1);
-	}
+		j = 0;
+		while (name[j] && environ[i][j] && name[j] == environ[i][j])
+			j++;
 
+		if (name[j] == '\0' && environ[i][j] == '=')
+			return (&environ[i][j + 1]);
+	}
 	return (NULL);
 }
