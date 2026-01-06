@@ -1,35 +1,61 @@
 #include "shell.h"
 #include <string.h>
-#include <unistd.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <stdio.h>
 
 /**
- * build_path - Builds the full path to a command.
- * @dir: Directory path.
- * @cmd: Command name.
- *
- * Return: Allocated string with full path or NULL.
+ * build_path - Concatenate dir and cmd with '/' in between.
+ * @dir: directory string.
+ * @cmd: command string.
+ * Return: allocated string with full path or NULL on failure.
  */
 static char *build_path(char *dir, char *cmd)
 {
-	char *full_path;
 	int len;
+	char *full_path;
 
 	len = strlen(dir) + strlen(cmd) + 2;
-	full_path = malloc(len);
+	full_path = malloc(sizeof(char) * len);
 	if (!full_path)
 		return (NULL);
 
-	sprintf(full_path, "%s/%s", dir, cmd);
+	snprintf(full_path, len, "%s/%s", dir, cmd);
 	return (full_path);
 }
 
 /**
- * find_command - Finds the full path of a command by searching PATH.
- * @command: The command name.
- *
- * Return: Allocated string with full path or NULL if not found.
+ * check_access - checks if a command exists and is executable.
+ * @path: full path to check.
+ * Return: 1 if executable, 0 otherwise.
+ */
+static int check_access(char *path)
+{
+	if (access(path, X_OK) == 0)
+		return (1);
+	return (0);
+}
+
+/**
+ * check_direct_path - checks if command contains '/' and is executable.
+ * @command: command string.
+ * Return: duplicated string if executable, NULL otherwise.
+ */
+static char *check_direct_path(char *command)
+{
+	if (strchr(command, '/'))
+	{
+		if (check_access(command))
+			return (strdup(command));
+		return (NULL);
+	}
+	return (NULL);
+}
+
+/**
+ * find_command - finds command full path in PATH or as direct path.
+ * @command: command name.
+ * Return: full path string or NULL if not found.
  */
 char *find_command(char *command)
 {
@@ -38,11 +64,10 @@ char *find_command(char *command)
 	if (!command)
 		return (NULL);
 
-	/* If command is an executable file itself */
-	if (access(command, X_OK) == 0)
-		return (strdup(command));
+	full_path = check_direct_path(command);
+	if (full_path)
+		return (full_path);
 
-	/* Get PATH environment variable */
 	path_env = _getenv("PATH");
 	if (!path_env || path_env[0] == '\0')
 		return (NULL);
@@ -55,11 +80,18 @@ char *find_command(char *command)
 	while (token)
 	{
 		full_path = build_path(token, command);
-		if (full_path && access(full_path, X_OK) == 0)
+		if (!full_path)
+		{
+			free(path_dup);
+			return (NULL);
+		}
+
+		if (check_access(full_path))
 		{
 			free(path_dup);
 			return (full_path);
 		}
+
 		free(full_path);
 		token = strtok(NULL, ":");
 	}
