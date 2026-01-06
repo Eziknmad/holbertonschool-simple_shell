@@ -3,6 +3,12 @@
 #include <unistd.h>
 #include <stdlib.h>
 
+/**
+ * shell_loop - main shell execution loop that reads and executes commands
+ *
+ * Description: Prints prompt, reads input line, parses arguments,
+ *              and executes commands until EOF or error.
+ */
 void shell_loop(void)
 {
 	char *line = NULL;
