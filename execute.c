@@ -5,97 +5,86 @@
 #include <stdio.h>
 
 /**
- * is_path_command - Checks if command contains a '/' char
- * @command: The command string
+ * is_path_command - Checks if command contains '/'
+ * @command: Command string
  *
- * Return: 1 if command contains '/', 0 otherwise
+ * Return: 1 if path command, 0 otherwise
  */
 int is_path_command(char *command)
 {
-	int i = 0;
+	int i;
 
 	if (!command)
 		return (0);
 
-	while (command[i])
+	for (i = 0; command[i]; i++)
 	{
 		if (command[i] == '/')
 			return (1);
-		i++;
 	}
 	return (0);
 }
 
 /**
- * run_path_command - Executes a command with path
- * @args: Argument list, args[0] is the command
+ * execute_path_command - Execute command with absolute or relative path
+ * @args: Argument vector
  */
-void run_path_command(char **args)
+void execute_path_command(char **args)
 {
 	pid_t pid;
-	int status;
+
+	if (access(args[0], X_OK) != 0)
+	{
+		fprintf(stderr, "%s: command not found\n", args[0]);
+		return;
+	}
 
 	pid = fork();
-	if (pid == -1)
-		perror("fork failed");
 	if (pid == 0)
 	{
-		execve(args[0], args, NULL);
-		perror("execve failed");
+		execve(args[0], args, environ);
 		exit(EXIT_FAILURE);
 	}
-	else
-		waitpid(pid, &status, 0);
+	wait(NULL);
 }
 
 /**
- * run_command_with_path - Executes a command by searching PATH
- * @args: Argument list, args[0] is the command
+ * execute_path_search_command - Execute command found via PATH search
+ * @args: Argument vector
  */
-void run_command_with_path(char **args)
+void execute_path_search_command(char **args)
 {
-	char *full_path;
+	pid_t pid;
+	char *path = find_command(args[0]);
 
-	full_path = find_command(args[0]);
-	if (full_path)
+	if (!path)
 	{
-		pid_t pid;
-		int status;
-
-		pid = fork();
-		if (pid == -1)
-			perror("fork failed");
-		if (pid == 0)
-		{
-			execve(full_path, args, NULL);
-			perror("execve failed");
-			free(full_path);
-			exit(EXIT_FAILURE);
-		}
-		else
-		{
-			waitpid(pid, &status, 0);
-			free(full_path);
-		}
-	}
-	else
-	{
-		/* command not found, print error */
 		fprintf(stderr, "%s: command not found\n", args[0]);
+		return;
 	}
+
+	pid = fork();
+	if (pid == 0)
+	{
+		execve(path, args, environ);
+		free(path);
+		exit(EXIT_FAILURE);
+	}
+	wait(NULL);
+	free(path);
 }
 
 /**
- * execute_command - Executes the command with arguments
- * @args: Null-terminated array of arguments
+ * execute_command - Executes a command
+ * @args: Argument vector
  */
 void execute_command(char **args)
 {
-	if (args == NULL || args[0] == NULL)
+	if (!args || !args[0])
 		return;
 
 	if (is_path_command(args[0]))
-		run_path_command(args);
+		execute_path_command(args);
 	else
-		run_command_with_path(args);
+		execute_path_search_command(args);
 }
