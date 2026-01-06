@@ -1,11 +1,10 @@
-#include "shell.h"
-#include <unistd.h>
+#include <stdio.h>
 
 /**
- * print_prompt - displays shell prompt
+ * print_prompt - Prints the shell prompt
  */
 void print_prompt(void)
 {
-	if (isatty(STDIN_FILENO))
-		write(STDOUT_FILENO, "$ ", 2);
+	printf(":) ");
+	fflush(stdout);
 }
