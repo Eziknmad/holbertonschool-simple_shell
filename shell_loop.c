@@ -1,40 +1,28 @@
 #include "shell.h"
-#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 /**
- * shell_loop - main shell execution loop
+ * shell_loop - Main shell loop that reads and executes commands
  */
 void shell_loop(void)
 {
 	char *line = NULL;
 	size_t len = 0;
-	ssize_t nread;
+	ssize_t read;
 	char **args;
 
 	while (1)
 	{
 		print_prompt();
-
-		nread = getline(&line, &len, stdin);
-		if (nread == -1)
+		read = getline(&line, &len, stdin);
+		if (read == -1)
 		{
 			free(line);
-			if (isatty(STDIN_FILENO))
-				write(STDOUT_FILENO, "\n", 1);
-			break;
+			exit(EXIT_SUCCESS);
 		}
-
-		if (line[nread - 1] == '\n')
-			line[nread - 1] = '\0';
-
-		trim_whitespace(line);
-
 		args = split_line(line);
-		if (!args)
-			continue;
-
 		execute_command(args);
-
 		free(args);
 	}
 }

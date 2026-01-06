@@ -1,46 +1,69 @@
 #include "shell.h"
 #include <string.h>
-#include <stdlib.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 /**
- * find_command - finds command full path in PATH env or returns NULL
- * @command: command name
+ * build_path - Builds the full path to a command.
+ * @dir: Directory path.
+ * @cmd: Command name.
  *
- * Return: full path string or NULL if not found
+ * Return: Allocated string with full path or NULL.
+ */
+static char *build_path(char *dir, char *cmd)
+{
+	char *full_path;
+	int len;
+
+	len = strlen(dir) + strlen(cmd) + 2;
+	full_path = malloc(len);
+	if (!full_path)
+		return (NULL);
+
+	sprintf(full_path, "%s/%s", dir, cmd);
+	return (full_path);
+}
+
+/**
+ * find_command - Finds the full path of a command by searching PATH.
+ * @command: The command name.
+ *
+ * Return: Allocated string with full path or NULL if not found.
  */
 char *find_command(char *command)
 {
-	char *path_env, *path_copy, *dir;
-	char full_path[1024];
+	char *path_env, *path_dup, *token, *full_path;
 
-	if (command[0] == '/')
-	{
-		if (access(command, X_OK) == 0)
-			return (strdup(command));
+	if (!command)
 		return (NULL);
-	}
 
+	/* If command is an executable file itself */
+	if (access(command, X_OK) == 0)
+		return (strdup(command));
+
+	/* Get PATH environment variable */
 	path_env = _getenv("PATH");
-	if (!path_env)
+	if (!path_env || path_env[0] == '\0')
 		return (NULL);
 
-	path_copy = strdup(path_env);
-	if (!path_copy)
+	path_dup = strdup(path_env);
+	if (!path_dup)
 		return (NULL);
 
-	dir = strtok(path_copy, ":");
-	while (dir != NULL)
+	token = strtok(path_dup, ":");
+	while (token)
 	{
-		snprintf(full_path, sizeof(full_path), "%s/%s", dir, command);
-		if (access(full_path, X_OK) == 0)
+		full_path = build_path(token, command);
+		if (full_path && access(full_path, X_OK) == 0)
 		{
-			free(path_copy);
-			return (strdup(full_path));
+			free(path_dup);
+			return (full_path);
 		}
-		dir = strtok(NULL, ":");
+		free(full_path);
+		token = strtok(NULL, ":");
 	}
 
-	free(path_copy);
+	free(path_dup);
 	return (NULL);
 }

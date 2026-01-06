@@ -1,50 +1,101 @@
 #include "shell.h"
-#include <string.h>
 #include <unistd.h>
-#include <stdlib.h>
 #include <sys/wait.h>
+#include <stdlib.h>
 #include <stdio.h>
 
 /**
- * execute_command - executes command if found
- * @args: arguments array, args[0] is command
+ * is_path_command - Checks if command contains a '/' char
+ * @command: The command string
  *
- * Return: void
+ * Return: 1 if command contains '/', 0 otherwise
  */
-void execute_command(char **args)
+int is_path_command(char *command)
+{
+	int i = 0;
+
+	if (!command)
+		return (0);
+
+	while (command[i])
+	{
+		if (command[i] == '/')
+			return (1);
+		i++;
+	}
+	return (0);
+}
+
+/**
+ * run_path_command - Executes a command with path
+ * @args: Argument list, args[0] is the command
+ */
+void run_path_command(char **args)
 {
 	pid_t pid;
 	int status;
-	char *cmd_path;
-
-	if (!args[0])
-		return;
-
-	cmd_path = find_command(args[0]);
-	if (!cmd_path)
-	{
-		write(STDERR_FILENO, "./hsh: 1: ", 10);
-		write(STDERR_FILENO, args[0], strlen(args[0]));
-		write(STDERR_FILENO, ": not found\n", 12);
-		return;
-	}
 
 	pid = fork();
+	if (pid == -1)
+		perror("fork failed");
 	if (pid == 0)
 	{
-		execve(cmd_path, args, environ);
-		perror("execve");
-		free(cmd_path);
+		execve(args[0], args, NULL);
+		perror("execve failed");
 		exit(EXIT_FAILURE);
 	}
-	else if (pid > 0)
-	{
+	else
 		waitpid(pid, &status, 0);
-		free(cmd_path);
+}
+
+/**
+ * run_command_with_path - Executes a command by searching PATH
+ * @args: Argument list, args[0] is the command
+ */
+void run_command_with_path(char **args)
+{
+	char *full_path;
+
+	full_path = find_command(args[0]);
+	if (full_path)
+	{
+		pid_t pid;
+		int status;
+
+		pid = fork();
+		if (pid == -1)
+			perror("fork failed");
+		if (pid == 0)
+		{
+			execve(full_path, args, NULL);
+			perror("execve failed");
+			free(full_path);
+			exit(EXIT_FAILURE);
+		}
+		else
+		{
+			waitpid(pid, &status, 0);
+			free(full_path);
+		}
 	}
 	else
 	{
-		perror("fork");
-		free(cmd_path);
+		/* command not found, print error */
+		fprintf(stderr, "%s: command not found\n", args[0]);
 	}
+}
+
+/**
+ * execute_command - Executes the command with arguments
+ * @args: Null-terminated array of arguments
+ */
+void execute_command(char **args)
+{
+	if (args == NULL || args[0] == NULL)
+		return;
+
+	if (is_path_command(args[0]))
+		run_path_command(args);
+	else
+		run_command_with_path(args);
 }
