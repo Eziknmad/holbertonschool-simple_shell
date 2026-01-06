@@ -1,13 +1,17 @@
 #include "shell.h"
+#include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <sys/wait.h>
+#include <stdio.h>
 
 /**
- * execute_command - forks and executes command with arguments
- * @args: arguments array (args[0] = command)
- * @shell_name: shell program name for error messages
+ * execute_command - executes command if found
+ * @args: arguments array, args[0] is command
  *
  * Return: void
  */
-void execute_command(char **args, char *shell_name)
+void execute_command(char **args)
 {
 	pid_t pid;
 	int status;
@@ -19,30 +23,28 @@ void execute_command(char **args, char *shell_name)
 	cmd_path = find_command(args[0]);
 	if (!cmd_path)
 	{
-		dprintf(STDERR_FILENO, "%s: 1: %s: not found\n", shell_name, args[0]);
+		write(STDERR_FILENO, "./hsh: 1: ", 10);
+		write(STDERR_FILENO, args[0], strlen(args[0]));
+		write(STDERR_FILENO, ": not found\n", 12);
 		return;
 	}
 
 	pid = fork();
-	if (pid == -1)
-	{
-		perror("fork");
-		free(cmd_path);
-		return;
-	}
-
 	if (pid == 0)
 	{
-		if (execve(cmd_path, args, environ) == -1)
-		{
-			perror(shell_name);
-			free(cmd_path);
-			exit(1);
-		}
+		execve(cmd_path, args, environ);
+		perror("execve");
+		free(cmd_path);
+		exit(EXIT_FAILURE);
+	}
+	else if (pid > 0)
+	{
+		waitpid(pid, &status, 0);
+		free(cmd_path);
 	}
 	else
 	{
-		waitpid(pid, &status, 0);
+		perror("fork");
 		free(cmd_path);
 	}
 }

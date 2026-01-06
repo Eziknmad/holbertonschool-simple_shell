@@ -1,7 +1,9 @@
 #include "shell.h"
+#include <string.h>
+#include <stdlib.h>
 
 /**
- * trim_whitespace - removes leading and trailing whitespace from a string
+ * trim_whitespace - removes leading and trailing whitespace from str
  * @str: string to trim
  *
  * Return: void
@@ -9,23 +11,27 @@
 void trim_whitespace(char *str)
 {
 	int start = 0, end = strlen(str) - 1;
-	int i = 0;
+	int i;
 
-	while (str[start] == ' ' || str[start] == '\t')
+	while (str[start] && (str[start] == ' ' || str[start] == '\t'))
 		start++;
 	while (end >= start && (str[end] == ' ' || str[end] == '\t'))
-		end--;
+		str[end--] = '\0';
 
-	while (start <= end)
-		str[i++] = str[start++];
-	str[i] = '\0';
+	if (start > 0)
+	{
+		i = 0;
+		while (str[start])
+			str[i++] = str[start++];
+		str[i] = '\0';
+	}
 }
 
 /**
- * split_line - splits a line into arguments array by whitespace
- * @line: input line
+ * split_line - splits line into tokens (words)
+ * @line: input string to split
  *
- * Return: NULL-terminated array of strings (needs free), or NULL on failure
+ * Return: array of pointers to tokens, NULL terminated
  */
 char **split_line(char *line)
 {
