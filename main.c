@@ -1,18 +1,12 @@
 #include "shell.h"
 
 /**
- * main - Entry point of the shell program
- * @argc: Number of command-line arguments
- * @argv: Array of command-line argument strings
+ * main - Entry point for simple shell
  *
- * Return: 0 on success, or exit code on failure
+ * Return: 0 on success
  */
-int main(int argc, char **argv)
+int main(void)
 {
-	(void)argc;
-	(void)argv;
-
 	shell_loop();
-
 	return (0);
 }

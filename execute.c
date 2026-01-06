@@ -1,90 +1,85 @@
 #include "shell.h"
-#include <unistd.h>
-#include <sys/wait.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
 #include <stdio.h>
 
 /**
- * is_path_command - Checks if command contains '/'
- * @command: Command string
- *
- * Return: 1 if path command, 0 otherwise
+ * execute_direct_path - executes a command given with a direct path
+ * @args: argument array (args[0] is command path)
  */
-int is_path_command(char *command)
-{
-	int i;
-
-	if (!command)
-		return (0);
-
-	for (i = 0; command[i]; i++)
-	{
-		if (command[i] == '/')
-			return (1);
-	}
-	return (0);
-}
-
-/**
- * execute_path_command - Execute command with absolute or relative path
- * @args: Argument vector
- */
-void execute_path_command(char **args)
+void execute_direct_path(char **args)
 {
 	pid_t pid;
-
-	if (access(args[0], X_OK) != 0)
-	{
-		fprintf(stderr, "%s: command not found\n", args[0]);
-		return;
-	}
+	int status;
 
 	pid = fork();
 	if (pid == 0)
 	{
 		execve(args[0], args, environ);
+		perror("execve");
 		exit(EXIT_FAILURE);
 	}
-	wait(NULL);
+	else if (pid > 0)
+	{
+		waitpid(pid, &status, 0);
+	}
+	else
+	{
+		perror("fork");
+	}
 }
 
 /**
- * execute_path_search_command - Execute command found via PATH search
- * @args: Argument vector
+ * execute_path_command - executes a command by searching in PATH
+ * @args: argument array (args[0] is command)
  */
-void execute_path_search_command(char **args)
+void execute_path_command(char **args)
 {
 	pid_t pid;
-	char *path = find_command(args[0]);
+	int status;
+	char *cmd_path;
 
-	if (!path)
+	cmd_path = find_command(args[0]);
+	if (!cmd_path)
 	{
-		fprintf(stderr, "%s: command not found\n", args[0]);
+		write(STDERR_FILENO, "./hsh: 1: ", 10);
+		write(STDERR_FILENO, args[0], strlen(args[0]));
+		write(STDERR_FILENO, ": not found\n", 12);
 		return;
 	}
 
 	pid = fork();
 	if (pid == 0)
 	{
-		execve(path, args, environ);
-		free(path);
+		execve(cmd_path, args, environ);
+		perror("execve");
+		free(cmd_path);
 		exit(EXIT_FAILURE);
 	}
-	wait(NULL);
-	free(path);
+	else if (pid > 0)
+	{
+		waitpid(pid, &status, 0);
+		free(cmd_path);
+	}
+	else
+	{
+		perror("fork");
+		free(cmd_path);
+	}
 }
 
 /**
- * execute_command - Executes a command
- * @args: Argument vector
+ * execute_command - executes a command, handling direct path or searching PATH
+ * @args: argument array
  */
 void execute_command(char **args)
 {
-	if (!args || !args[0])
+	if (!args[0])
 		return;
 
-	if (is_path_command(args[0]))
-		execute_path_command(args);
+	if (args[0][0] == '/')
+		execute_direct_path(args);
 	else
-		execute_path_search_command(args);
+		execute_path_command(args);
 }
