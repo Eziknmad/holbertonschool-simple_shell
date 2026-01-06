@@ -6,6 +6,7 @@
 
 extern char **environ;
 
+/* Function prototypes */
 char *_getenv(const char *name);
 char *find_command(char *command);
 
@@ -30,22 +31,6 @@ void shell_loop(void);
 void execute_command(char **args);
 
 /**
- * _getenv - Gets environment variable value
- * @name: Variable name
- *
- * Return: Value of variable or NULL
- */
-char *_getenv(const char *name);
-
-/**
- * find_command - Finds command in PATH
- * @command: Command name
- *
- * Return: Full path or NULL
- */
-char *find_command(char *command);
-
-/**
  * print_prompt - Prints shell prompt
  */
 void print_prompt(void);
@@ -66,4 +51,4 @@ char *trim_whitespace(char *str);
  */
 char **split_line(char *line);
 
-#endif
+#endif /* SHELL_H */

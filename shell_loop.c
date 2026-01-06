@@ -3,26 +3,29 @@
 #include <stdlib.h>
 
 /**
- * shell_loop - Main shell loop that reads and executes commands
+ * shell_loop - Main shell loop
  */
 void shell_loop(void)
 {
 	char *line = NULL;
 	size_t len = 0;
-	ssize_t read;
 	char **args;
 
 	while (1)
 	{
 		print_prompt();
-		read = getline(&line, &len, stdin);
-		if (read == -1)
-		{
-			free(line);
-			exit(EXIT_SUCCESS);
-		}
+		if (getline(&line, &len, stdin) == -1)
+			break;
+
 		args = split_line(line);
+		if (!args || !args[0])
+		{
+			free(args);
+			continue;
+		}
+
 		execute_command(args);
 		free(args);
 	}
+	free(line);
 }
