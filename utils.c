@@ -1,60 +1,62 @@
 #include "shell.h"
 #include <string.h>
-#include <stdlib.h>
 
 /**
- * trim_whitespace - removes leading and trailing whitespace from str
- * @str: string to trim
+ * trim_whitespace - Trims leading and trailing whitespace
+ * @str: Input string
  *
- * Return: void
+ * Return: Trimmed string
  */
-void trim_whitespace(char *str)
+char *trim_whitespace(char *str)
 {
-	int start = 0, end = strlen(str) - 1;
-	int i;
+	int start = 0;
+	int end;
 
-	while (str[start] && (str[start] == ' ' || str[start] == '\t'))
+	if (!str)
+		return (NULL);
+
+	end = strlen(str) - 1;
+
+	while (str[start] &&
+	       (str[start] == ' ' ||
+		str[start] == '\t' ||
+		str[start] == '\n'))
 		start++;
-	while (end >= start && (str[end] == ' ' || str[end] == '\t'))
-		str[end--] = '\0';
 
-	if (start > 0)
-	{
-		i = 0;
-		while (str[start])
-			str[i++] = str[start++];
-		str[i] = '\0';
-	}
+	while (end >= start &&
+	       (str[end] == ' ' ||
+		str[end] == '\t' ||
+		str[end] == '\n'))
+		end--;
+
+	str[end + 1] = '\0';
+
+	return (str + start);
 }
 
 /**
- * split_line - splits line into tokens (words)
- * @line: input string to split
+ * split_line - Splits a line into tokens
+ * @line: Input line
  *
- * Return: array of pointers to tokens, NULL terminated
+ * Return: NULL-terminated array of tokens
  */
 char **split_line(char *line)
 {
-	int bufsize = 64, position = 0;
-	char **tokens = malloc(bufsize * sizeof(char *));
+	int bufsize = 64, pos = 0;
+	char **tokens;
 	char *token;
 
+	tokens = malloc(sizeof(char *) * bufsize);
 	if (!tokens)
 		return (NULL);
 
-	token = strtok(line, " \t");
-	while (token != NULL)
+	token = strtok(line, " \t\n");
+	while (token)
 	{
-		tokens[position++] = token;
-		if (position >= bufsize)
-		{
-			bufsize += 64;
-			tokens = realloc(tokens, bufsize * sizeof(char *));
-			if (!tokens)
-				return (NULL);
-		}
-		token = strtok(NULL, " \t");
+		tokens[pos++] = token;
+		token = strtok(NULL, " \t\n");
 	}
-	tokens[position] = NULL;
+	tokens[pos] = NULL;
+
 	return (tokens);
 }
