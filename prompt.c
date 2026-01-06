@@ -1,12 +1,11 @@
 #include "shell.h"
+#include <unistd.h>
 
 /**
- * print_prompt - prints the shell prompt if input is from terminal
- *
- * Return: void
+ * print_prompt - displays shell prompt
  */
 void print_prompt(void)
 {
 	if (isatty(STDIN_FILENO))
-		write(STDOUT_FILENO, "#cisfun$ ", 8);
+		write(STDOUT_FILENO, "$ ", 2);
 }
