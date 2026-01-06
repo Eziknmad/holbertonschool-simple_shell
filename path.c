@@ -1,38 +1,17 @@
 #include "shell.h"
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 /**
- * _getenv - gets the value of an environment variable
- * @name: variable name
- *
- * Return: pointer to value or NULL
- */
-char *_getenv(const char *name)
-{
-	int i, j;
-
-	if (!name || !environ)
-		return (NULL);
-
-	for (i = 0; environ[i]; i++)
-	{
-		for (j = 0; name[j] && environ[i][j] && name[j] == environ[i][j]; j++)
-			;
-
-		if (name[j] == '\0' && environ[i][j] == '=')
-			return (&environ[i][j + 1]);
-	}
-	return (NULL);
-}
-
-/**
- * find_command - finds command in PATH or returns NULL if not found
+ * find_command - finds command full path in PATH env or returns NULL
  * @command: command name
  *
- * Return: full path string (malloc'd) or NULL if not found
+ * Return: full path string or NULL if not found
  */
 char *find_command(char *command)
 {
-	char *path, *path_copy, *dir;
+	char *path_env, *path_copy, *dir;
 	char full_path[1024];
 
 	if (command[0] == '/')
@@ -42,16 +21,16 @@ char *find_command(char *command)
 		return (NULL);
 	}
 
-	path = _getenv("PATH");
-	if (!path)
+	path_env = _getenv("PATH");
+	if (!path_env)
 		return (NULL);
 
-	path_copy = strdup(path);
+	path_copy = strdup(path_env);
 	if (!path_copy)
 		return (NULL);
 
 	dir = strtok(path_copy, ":");
-	while (dir)
+	while (dir != NULL)
 	{
 		snprintf(full_path, sizeof(full_path), "%s/%s", dir, command);
 		if (access(full_path, X_OK) == 0)
@@ -61,6 +40,7 @@ char *find_command(char *command)
 		}
 		dir = strtok(NULL, ":");
 	}
+
 	free(path_copy);
 	return (NULL);
 }

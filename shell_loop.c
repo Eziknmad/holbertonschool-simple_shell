@@ -1,24 +1,22 @@
 #include "shell.h"
+#include <string.h>
 
 /**
- * shell_loop - main shell loop
- * @shell_name: name of the shell executable (argv[0])
- *
- * Return: void
+ * shell_loop - main shell execution loop
  */
-void shell_loop(char *shell_name)
+void shell_loop(void)
 {
 	char *line = NULL;
 	size_t len = 0;
-	ssize_t read;
+	ssize_t nread;
 	char **args;
 
 	while (1)
 	{
 		print_prompt();
 
-		read = getline(&line, &len, stdin);
-		if (read == -1)
+		nread = getline(&line, &len, stdin);
+		if (nread == -1)
 		{
 			free(line);
 			if (isatty(STDIN_FILENO))
@@ -26,19 +24,16 @@ void shell_loop(char *shell_name)
 			break;
 		}
 
-		if (line[read - 1] == '\n')
-			line[read - 1] = '\0';
+		if (line[nread - 1] == '\n')
+			line[nread - 1] = '\0';
 
 		trim_whitespace(line);
-
-		if (line[0] == '\0')
-			continue;
 
 		args = split_line(line);
 		if (!args)
 			continue;
 
-		execute_command(args, shell_name);
+		execute_command(args);
 
 		free(args);
 	}
