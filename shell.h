@@ -12,14 +12,13 @@ extern char **environ;
 int shell_loop(void);
 void print_prompt(void);
 
-void execute_command(char **args);
+int execute_command(char **args);
 int execute_direct_path(char **args);
 int execute_path_command(char **args);
 
 char *_getenv(const char *name);
 char *find_command(char *command);
-
 void trim_whitespace(char *str);
 char **split_line(char *line);
 
-#endif /* SIMPLE_SHELL_H */
+#endif

@@ -31,7 +31,7 @@ int shell_loop(void)
 		if (!args)
 			continue;
 
-		execute_command(args);
+		status = execute_command(args);
 		free(args);
 	}
 }

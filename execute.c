@@ -69,16 +69,23 @@ int execute_path_command(char **args)
 }
 
 /**
- * execute_command - executes a command, handling PATH or direct execution
+ * execute_command - dispatches command execution
  * @args: argument array
+ *
+ * Return: exit status
  */
-void execute_command(char **args)
+int execute_command(char **args)
 {
 	if (!args || !args[0])
-		return;
+		return (0);
 
-	if (strchr(args[0], '/'))
-		execute_direct_path(args);
-	else
-		execute_path_command(args);
+	/* Check if args[0] is an absolute or relative path */
+
+	if (args[0][0] == '/' ||                 /* absolute path */
+	    (args[0][0] == '.' &&                 /* relative path starting with . */
+	     (args[0][1] == '/' ||                /* ./ */
+	      (args[0][1] == '.' && args[0][2] == '/')))) /* ../ */
+		return (execute_direct_path(args));
+
+	return (execute_path_command(args));
 }
