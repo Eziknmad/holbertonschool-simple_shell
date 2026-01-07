@@ -78,6 +78,8 @@ int execute_path_command(char **args)
  */
 int execute_command(char **args)
 {
+	int status;
+
 	if (!args || !args[0])
 		return (0);
 
@@ -88,7 +90,11 @@ int execute_command(char **args)
 	    (args[0][0] == '.' &&
 	     (args[0][1] == '/' ||
 	      (args[0][1] == '.' && args[0][2] == '/'))))
-		return (execute_direct_path(args));
+	{
+		status = execute_direct_path(args);
+		return (status);
+	}
 
-	return (execute_path_command(args));
+	status = execute_path_command(args);
+	return (status);
 }
