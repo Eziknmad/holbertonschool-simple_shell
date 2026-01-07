@@ -1,4 +1,6 @@
 #include "shell.h"
+#include <stdlib.h>
+#include <unistd.h>
 
 /**
  * shell_loop - main shell loop
@@ -16,6 +18,7 @@ int shell_loop(void)
 	while (1)
 	{
 		print_prompt();
+
 		nread = getline(&line, &len, stdin);
 		if (nread == -1)
 		{
@@ -32,6 +35,13 @@ int shell_loop(void)
 			continue;
 
 		status = execute_command(args);
+
 		free(args);
+
+		if (status == -1)
+		{
+			free(line);
+			exit(0);
+		}
 	}
 }
