@@ -69,23 +69,30 @@ int execute_path_command(char **args)
 }
 
 /**
- * execute_command - dispatches command execution
+ * execute_command - executes a command
  * @args: argument array
  *
- * Return: exit status
+ * Return: Always 0
  */
 int execute_command(char **args)
 {
 	if (!args || !args[0])
 		return (0);
 
-	/* Check if args[0] is an absolute or relative path */
+	if (strcmp(args[0], "exit") == 0)
+	{
+		exit(0);
+	}
 
-	if (args[0][0] == '/' ||                 /* absolute path */
-	    (args[0][0] == '.' &&                 /* relative path starting with . */
-	     (args[0][1] == '/' ||                /* ./ */
-	      (args[0][1] == '.' && args[0][2] == '/')))) /* ../ */
-		return (execute_direct_path(args));
+	if (args[0][0] == '/' ||
+	    (args[0][0] == '.' &&
+	     (args[0][1] == '/' ||
+	      (args[0][1] == '.' && args[0][2] == '/'))))
+	{
+		execute_direct_path(args);
+		return (0);
+	}
 
-	return (execute_path_command(args));
+	execute_path_command(args);
+	return (0);
 }
