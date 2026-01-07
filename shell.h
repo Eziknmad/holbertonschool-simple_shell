@@ -12,7 +12,7 @@ extern char **environ;
 int shell_loop(void);
 void print_prompt(void);
 
-int execute_command(char **args);
+void execute_command(char **args);
 int execute_direct_path(char **args);
 int execute_path_command(char **args);
 

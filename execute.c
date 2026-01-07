@@ -69,19 +69,16 @@ int execute_path_command(char **args)
 }
 
 /**
- * execute_command - dispatches command execution
+ * execute_command - executes a command, handling PATH or direct execution
  * @args: argument array
- *
- * Return: exit status
  */
-int execute_command(char **args)
+void execute_command(char **args)
 {
 	if (!args || !args[0])
-		return (0);
+		return;
 
-	if (args[0][0] == '/' ||
-	   (args[0][0] == '.' && args[0][1] == '/'))
-		return (execute_direct_path(args));
-
-	return (execute_path_command(args));
+	if (strchr(args[0], '/'))
+		execute_direct_path(args);
+	else
+		execute_path_command(args);
 }
