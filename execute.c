@@ -19,7 +19,7 @@ int execute_direct_path(char **args)
 	{
 		execve(args[0], args, environ);
 		perror("execve");
-		exit(1);
+		exit(127);
 	}
 	if (pid < 0)
 	{
@@ -57,7 +57,7 @@ int execute_path_command(char **args)
 		execve(cmd_path, args, environ);
 		perror("execve");
 		free(cmd_path);
-		exit(1);
+		exit(127);
 	}
 	if (pid < 0)
 	{
