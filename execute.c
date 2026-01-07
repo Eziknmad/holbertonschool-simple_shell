@@ -1,7 +1,5 @@
 #include "shell.h"
 #include <string.h>
-#include <unistd.h>
-#include <stdlib.h>
 
 /**
  * execute_direct_path - executes command using a direct path
@@ -19,15 +17,19 @@ int execute_direct_path(char **args)
 	{
 		execve(args[0], args, environ);
 		perror("execve");
-		exit(127);
+		exit(1);
 	}
 	if (pid < 0)
 	{
 		perror("fork");
 		return (1);
 	}
+
 	waitpid(pid, &status, 0);
-	return (WIFEXITED(status) ? WEXITSTATUS(status) : 1);
+	if (WIFEXITED(status))
+		return (WEXITSTATUS(status));
+
+	return (1);
 }
 
 /**
@@ -57,7 +59,7 @@ int execute_path_command(char **args)
 		execve(cmd_path, args, environ);
 		perror("execve");
 		free(cmd_path);
-		exit(127);
+		exit(1);
 	}
 	if (pid < 0)
 	{
@@ -65,16 +67,21 @@ int execute_path_command(char **args)
 		perror("fork");
 		return (1);
 	}
+
 	waitpid(pid, &status, 0);
 	free(cmd_path);
-	return (WIFEXITED(status) ? WEXITSTATUS(status) : 1);
+
+	if (WIFEXITED(status))
+		return (WEXITSTATUS(status));
+
+	return (1);
 }
 
 /**
- * execute_command - executes a command, or signals exit request
+ * execute_command - executes a command
  * @args: argument array
  *
- * Return: -1 if exit requested, else exit status
+ * Return: command exit status, or -1 on exit
  */
 int execute_command(char **args)
 {
@@ -87,9 +94,9 @@ int execute_command(char **args)
 		return (-1);
 
 	if (args[0][0] == '/' ||
-	    (args[0][0] == '.' &&
-	     (args[0][1] == '/' ||
-	      (args[0][1] == '.' && args[0][2] == '/'))))
+		(args[0][0] == '.' &&
+		(args[0][1] == '/' ||
+		(args[0][1] == '.' && args[0][2] == '/'))))
 	{
 		status = execute_direct_path(args);
 		return (status);

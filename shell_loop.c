@@ -1,6 +1,4 @@
 #include "shell.h"
-#include <stdlib.h>
-#include <unistd.h>
 
 /**
  * shell_loop - main shell loop
@@ -14,6 +12,7 @@ int shell_loop(void)
 	ssize_t nread;
 	char **args;
 	int status = 0;
+	int ret;
 
 	while (1)
 	{
@@ -34,14 +33,15 @@ int shell_loop(void)
 		if (!args)
 			continue;
 
-		status = execute_command(args);
-
+		ret = execute_command(args);
 		free(args);
 
-		if (status == -1)
+		if (ret == -1)
 		{
 			free(line);
-			exit(0);
+			exit(status);
 		}
+
+		status = ret;
 	}
 }
