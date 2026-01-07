@@ -9,12 +9,12 @@
 
 extern char **environ;
 
-void shell_loop(void);
+int shell_loop(void);
 void print_prompt(void);
 
-void execute_command(char **args);
-void execute_direct_path(char **args);
-void execute_path_command(char **args);
+int execute_command(char **args);
+int execute_direct_path(char **args);
+int execute_path_command(char **args);
 
 char *_getenv(const char *name);
 char *find_command(char *command);
