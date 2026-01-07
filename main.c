@@ -1,12 +1,11 @@
 #include "shell.h"
 
 /**
- * main - Entry point for simple shell
+ * main - entry point
  *
- * Return: 0 on success
+ * Return: shell exit status
  */
 int main(void)
 {
-	shell_loop();
-	return (0);
+	return (shell_loop());
 }

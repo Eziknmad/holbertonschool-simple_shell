@@ -1,32 +1,26 @@
 #include "shell.h"
-#include <string.h>
-#include <unistd.h>
-#include <stdlib.h>
 
 /**
- * shell_loop - main shell execution loop that reads and executes commands
+ * shell_loop - main shell loop
  *
- * Description: Prints prompt, reads input line, parses arguments,
- *              and executes commands until EOF or error.
+ * Return: last command exit status
  */
-void shell_loop(void)
+int shell_loop(void)
 {
 	char *line = NULL;
 	size_t len = 0;
 	ssize_t nread;
 	char **args;
+	int status = 0;
 
 	while (1)
 	{
 		print_prompt();
-
 		nread = getline(&line, &len, stdin);
 		if (nread == -1)
 		{
 			free(line);
-			if (isatty(STDIN_FILENO))
-				write(STDOUT_FILENO, "\n", 1);
-			exit(0);
+			return (status);
 		}
 
 		if (line[nread - 1] == '\n')
@@ -37,7 +31,7 @@ void shell_loop(void)
 		if (!args)
 			continue;
 
-		execute_command(args);
+		status = execute_command(args);
 		free(args);
 	}
 }
