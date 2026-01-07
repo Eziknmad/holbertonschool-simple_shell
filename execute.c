@@ -1,5 +1,7 @@
 #include "shell.h"
 #include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 /**
  * execute_direct_path - executes command using a direct path
@@ -69,10 +71,10 @@ int execute_path_command(char **args)
 }
 
 /**
- * execute_command - executes a command
+ * execute_command - executes a command, or signals exit request
  * @args: argument array
  *
- * Return: Always 0
+ * Return: -1 if exit requested, else exit status
  */
 int execute_command(char **args)
 {
@@ -80,19 +82,13 @@ int execute_command(char **args)
 		return (0);
 
 	if (strcmp(args[0], "exit") == 0)
-	{
-		exit(0);
-	}
+		return (-1);
 
 	if (args[0][0] == '/' ||
 	    (args[0][0] == '.' &&
 	     (args[0][1] == '/' ||
 	      (args[0][1] == '.' && args[0][2] == '/'))))
-	{
-		execute_direct_path(args);
-		return (0);
-	}
+		return (execute_direct_path(args));
 
-	execute_path_command(args);
-	return (0);
+	return (execute_path_command(args));
 }
