@@ -2,6 +2,26 @@
 #include <string.h>
 
 /**
+ * execute_env - prints the environment
+ *
+ * Return: 0
+ */
+int execute_env(void)
+{
+	int i = 0;
+	char **env = environ;
+
+	while (env[i])
+	{
+		write(STDOUT_FILENO, env[i], strlen(env[i]));
+		write(STDOUT_FILENO, "\n", 1);
+		i++;
+	}
+
+	return (0);
+}
+
+/**
  * execute_direct_path - executes command using a direct path
  * @args: argument array
  *
@@ -93,6 +113,9 @@ int execute_command(char **args)
 	if (strcmp(args[0], "exit") == 0)
 		return (-1);
 
+	if (strcmp(args[0], "env") == 0)
+		return (execute_env());
+
 	if (args[0][0] == '/' ||
 		(args[0][0] == '.' &&
 		(args[0][1] == '/' ||
@@ -105,3 +128,4 @@ int execute_command(char **args)
 	status = execute_path_command(args);
 	return (status);
 }
+
